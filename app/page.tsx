@@ -2,22 +2,24 @@
 
 import React, { useState, useRef } from 'react';
 import { Navbar } from '@/components/Navbar';
+import { QuickEditor } from '@/components/QuickEditor';
+import { CanvasPreview } from '@/components/CanvasPreview';
 import { PresetTemplates } from '@/components/PresetTemplates';
 import { TextEditorPanel } from '@/components/TextEditorPanel';
 import { LogoUploader } from '@/components/LogoUploader';
 import { StyleControls } from '@/components/StyleControls';
-import { CanvasPreview } from '@/components/CanvasPreview';
 import { ExportModal } from '@/components/ExportModal';
-import { PRESET_TEMPLATES, TemplatePreset, RANDOM_MEME_PRESETS } from '@/lib/presets';
-import { copyElementToClipboard, shareElementAsImage } from '@/lib/exportUtils';
-import { Sparkles, Heart, Edit3, Eye, Download, Copy, Share2 } from 'lucide-react';
+import { PRESET_TEMPLATES, PRESET_LOGOS, TemplatePreset, RANDOM_MEME_PRESETS } from '@/lib/presets';
+import { copyElementToClipboard, exportElementAsImage, shareElementAsImage } from '@/lib/exportUtils';
+import { Sparkles, Heart, Sliders, Image as ImageIcon, Palette, AlignJustify, Eye, Edit3, ArrowDown } from 'lucide-react';
 
 export default function HomePage() {
   const initialPreset = PRESET_TEMPLATES[0];
 
-  // Editor State
+  // Core Editor State
   const [currentPresetId, setCurrentPresetId] = useState<string>(initialPreset.id);
   const [lines, setLines] = useState<string[]>(initialPreset.lines);
+  const [rawText, setRawText] = useState<string>(initialPreset.lines.join('\n'));
   const [selectedLogoId, setSelectedLogoId] = useState<string | undefined>(initialPreset.logoId);
   const [customLogoUrl, setCustomLogoUrl] = useState<string | undefined>(undefined);
   const [logoScale, setLogoScale] = useState<number>(1.0);
@@ -35,25 +37,39 @@ export default function HomePage() {
   const [borderStyle, setBorderStyle] = useState<'none' | 'thin' | 'sticker' | 'neon'>('none');
   const [watermark, setWatermark] = useState<string>('@triwahyu45');
 
+  // Customization Section Tab: 'logo' | 'preset' | 'style' | 'lines'
+  const [activeCustomTab, setActiveCustomTab] = useState<'logo' | 'preset' | 'style' | 'lines'>('logo');
+
   // Mobile View Switcher: 'editor' | 'preview'
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor');
 
-  // Export & UI State
+  // Action / Export States
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [isCopying, setIsCopying] = useState<boolean>(false);
   const [copiedSuccess, setCopiedSuccess] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLDivElement>(null);
+  const customizationRef = useRef<HTMLDivElement>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  // Sync raw text with lines
+  const handleRawTextChange = (text: string) => {
+    setRawText(text);
+    const splitLines = text.split('\n');
+    setLines(splitLines);
+    setCurrentPresetId('custom');
+  };
+
   const handleSelectPreset = (preset: TemplatePreset) => {
     setCurrentPresetId(preset.id);
     setLines([...preset.lines]);
+    setRawText(preset.lines.join('\n'));
     setSelectedLogoId(preset.logoId);
     setCustomLogoUrl(undefined);
     setTextCase(preset.textCase);
@@ -83,6 +99,7 @@ export default function HomePage() {
     const randomIndex = Math.floor(Math.random() * RANDOM_MEME_PRESETS.length);
     const item = RANDOM_MEME_PRESETS[randomIndex];
     setLines([...item.lines]);
+    setRawText(item.lines.join('\n'));
     setSelectedLogoId(item.logoId);
     setCustomLogoUrl(undefined);
     setTextCase(item.textCase || 'lowercase');
@@ -91,6 +108,27 @@ export default function HomePage() {
     showToast('🎲 Ide meme acak berhasil dimuat!');
   };
 
+  // 1-Click Fast Download
+  const handleQuickDownload = async () => {
+    if (!canvasRef.current) return;
+    setIsDownloading(true);
+    try {
+      await exportElementAsImage(canvasRef.current, {
+        pixelRatio: 3,
+        format: 'png',
+        transparent: bgMode === 'transparent',
+        filename: `katagenerator-${Date.now()}.png`,
+      });
+      showToast('Gambar berhasil di-download! Siap diposting.');
+    } catch (err) {
+      console.error('Quick download failed:', err);
+      showToast('Gagal men-download gambar. Silakan gunakan Opsi Ekspor.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // 1-Click Fast Copy
   const handleQuickCopy = async () => {
     if (!canvasRef.current) return;
     setIsCopying(true);
@@ -103,12 +141,13 @@ export default function HomePage() {
       }
     } catch (err) {
       console.error('Quick copy error:', err);
-      showToast('Gagal menyalin. Silakan gunakan tombol Export / Download.');
+      showToast('Gagal menyalin. Silakan gunakan tombol Simpan Gambar.');
     } finally {
       setIsCopying(false);
     }
   };
 
+  // 1-Click Share
   const handleShare = async () => {
     if (!canvasRef.current) return;
     try {
@@ -118,10 +157,20 @@ export default function HomePage() {
       }
     } catch (err) {
       console.error('Share error:', err);
-      showToast('Gagal membagikan langsung. Menggunakan salin gambar...');
       handleQuickCopy();
     }
   };
+
+  const scrollToCustomization = (tab?: 'logo' | 'preset' | 'style' | 'lines') => {
+    if (tab) setActiveCustomTab(tab);
+    customizationRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const activeLogoName = customLogoUrl
+    ? 'Gambar Upload Sendiri'
+    : selectedLogoId
+    ? PRESET_LOGOS.find((l) => l.id === selectedLogoId)?.name
+    : undefined;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
@@ -136,10 +185,10 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Main Workspace Layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 pb-24 lg:pb-8">
+      {/* Main Container */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 pb-24 lg:pb-12 space-y-8 sm:space-y-12">
         {/* Mobile Tab Switcher (< lg) */}
-        <div className="lg:hidden flex items-center bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-800 mb-4 sticky top-18 z-30 shadow-lg">
+        <div className="lg:hidden flex items-center bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-800 sticky top-18 z-30 shadow-lg">
           <button
             onClick={() => setMobileTab('editor')}
             className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
@@ -149,7 +198,7 @@ export default function HomePage() {
             }`}
           >
             <Edit3 className="w-3.5 h-3.5" />
-            <span>Editor & Opsi</span>
+            <span>Ketik Teks</span>
           </button>
           <button
             onClick={() => setMobileTab('preview')}
@@ -160,96 +209,57 @@ export default function HomePage() {
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
-            <span>Live Preview Stiker</span>
+            <span>Lihat Stiker</span>
           </button>
         </div>
 
+        {/* SECTION 1: SUPER SIMPLE STUDIO (Ketik Teks & Simpan) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-          {/* Left Column: Editor & Controls (7 cols) */}
+          {/* Left Column: Quick Typing & Fast Actions (7 cols) */}
           <div
-            className={`lg:col-span-7 space-y-5 ${
+            className={`lg:col-span-7 space-y-4 ${
               mobileTab === 'preview' ? 'hidden lg:block' : 'block'
             }`}
           >
-            {/* 1. Presets */}
-            <PresetTemplates
-              currentPresetId={currentPresetId}
-              onSelectPreset={(p) => {
-                handleSelectPreset(p);
-                // On mobile, if user picks a preset, switch to preview smoothly
-                if (window.innerWidth < 1024) {
-                  setMobileTab('preview');
-                }
-              }}
-            />
-
-            {/* 2. Text Editor */}
-            <TextEditorPanel
-              lines={lines}
-              onChangeLines={(newLines) => {
-                setLines(newLines);
-                setCurrentPresetId('custom');
-              }}
+            <QuickEditor
+              rawText={rawText}
+              onChangeRawText={handleRawTextChange}
               textCase={textCase}
               onChangeTextCase={setTextCase}
-              fontSize={fontSize}
-              onChangeFontSize={setFontSize}
-              lineGap={lineGap}
-              onChangeLineGap={setLineGap}
-              letterSpacing={letterSpacing}
-              onChangeLetterSpacing={setLetterSpacing}
-              singleWordAlign={singleWordAlign}
-              onChangeSingleWordAlign={setSingleWordAlign}
-              onRandomMeme={handleRandomMeme}
-            />
-
-            {/* 3. Logo & Image Inserter */}
-            <LogoUploader
-              selectedLogoId={selectedLogoId}
-              customLogoUrl={customLogoUrl}
-              logoScale={logoScale}
-              invertLogo={invertLogo}
-              onSelectPresetLogo={(id) => {
-                setSelectedLogoId(id);
-                setCustomLogoUrl(undefined);
-              }}
-              onUploadCustomLogo={(url) => {
-                setCustomLogoUrl(url);
-                setSelectedLogoId(undefined);
-              }}
-              onRemoveLogo={() => {
-                setSelectedLogoId(undefined);
-                setCustomLogoUrl(undefined);
-              }}
-              onChangeLogoScale={setLogoScale}
-              onToggleInvertLogo={() => setInvertLogo(!invertLogo)}
-            />
-
-            {/* 4. Style & Canvas Controls */}
-            <StyleControls
-              fontFamily={fontFamily}
-              onChangeFontFamily={setFontFamily}
               bgMode={bgMode}
               onChangeBgMode={setBgMode}
-              aspectRatio={aspectRatio}
-              onChangeAspectRatio={setAspectRatio}
-              cornerRadius={cornerRadius}
-              onChangeCornerRadius={setCornerRadius}
-              borderStyle={borderStyle}
-              onChangeBorderStyle={setBorderStyle}
-              padding={padding}
-              onChangePadding={setPadding}
-              watermark={watermark}
-              onChangeWatermark={setWatermark}
+              onQuickDownload={handleQuickDownload}
+              onQuickCopy={handleQuickCopy}
+              onRandomMeme={handleRandomMeme}
+              onOpenAdvancedModal={() => setIsExportModalOpen(true)}
+              onScrollToCustomization={() => scrollToCustomization('logo')}
+              isDownloading={isDownloading}
+              isCopying={isCopying}
+              copiedSuccess={copiedSuccess}
+              activeLogoName={activeLogoName}
             />
           </div>
 
-          {/* Right Column: Sticky Live Preview (5 cols) */}
+          {/* Right Column: Live Stiker Preview (5 cols) */}
           <div
             className={`lg:col-span-5 lg:sticky lg:top-20 space-y-4 ${
               mobileTab === 'editor' ? 'hidden lg:block' : 'block'
             }`}
           >
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>2. Hasil Stiker (Live Preview)</span>
+              </span>
+              <button
+                onClick={() => scrollToCustomization('style')}
+                className="text-[11px] text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer"
+              >
+                <span>Atur Kanvas</span>
+                <ArrowDown className="w-3 h-3" />
+              </button>
+            </div>
+
             <CanvasPreview
               ref={canvasRef}
               lines={lines}
@@ -277,6 +287,147 @@ export default function HomePage() {
             />
           </div>
         </div>
+
+        {/* SECTION 2: PENGATURAN TAMBAHAN / KUSTOMISASI (DI BAWAHNYA, RAPI & OPSIONAL) */}
+        <div ref={customizationRef} className="pt-6 sm:pt-10 border-t border-slate-800/80 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-rose-400" />
+                <span>Pengaturan Tambahan & Kustomisasi</span>
+                <span className="text-xs font-normal text-slate-400">(Opsional)</span>
+              </h3>
+              <p className="text-xs text-slate-400">
+                Pilih tab di bawah jika ingin menambahkan logo band, memilih template viral, atau mengganti jenis font.
+              </p>
+            </div>
+
+            {/* Customization Tabs Switcher */}
+            <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs overflow-x-auto">
+              <button
+                onClick={() => setActiveCustomTab('logo')}
+                className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+                  activeCustomTab === 'logo'
+                    ? 'bg-rose-500 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Logo Band / Foto</span>
+              </button>
+              <button
+                onClick={() => setActiveCustomTab('preset')}
+                className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+                  activeCustomTab === 'preset'
+                    ? 'bg-rose-500 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Template Viral</span>
+              </button>
+              <button
+                onClick={() => setActiveCustomTab('style')}
+                className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+                  activeCustomTab === 'style'
+                    ? 'bg-rose-500 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Palette className="w-3.5 h-3.5" />
+                <span>Gaya & Font</span>
+              </button>
+              <button
+                onClick={() => setActiveCustomTab('lines')}
+                className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+                  activeCustomTab === 'lines'
+                    ? 'bg-rose-500 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <AlignJustify className="w-3.5 h-3.5" />
+                <span>Atur Per-Baris</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Tab Content Display */}
+          <div className="animate-in fade-in duration-200">
+            {activeCustomTab === 'logo' && (
+              <LogoUploader
+                selectedLogoId={selectedLogoId}
+                customLogoUrl={customLogoUrl}
+                logoScale={logoScale}
+                invertLogo={invertLogo}
+                onSelectPresetLogo={(id) => {
+                  setSelectedLogoId(id);
+                  setCustomLogoUrl(undefined);
+                  showToast('Logo band diterapkan!');
+                }}
+                onUploadCustomLogo={(url) => {
+                  setCustomLogoUrl(url);
+                  setSelectedLogoId(undefined);
+                  showToast('Gambar sendiri diterapkan!');
+                }}
+                onRemoveLogo={() => {
+                  setSelectedLogoId(undefined);
+                  setCustomLogoUrl(undefined);
+                  showToast('Logo dihapus.');
+                }}
+                onChangeLogoScale={setLogoScale}
+                onToggleInvertLogo={() => setInvertLogo(!invertLogo)}
+              />
+            )}
+
+            {activeCustomTab === 'preset' && (
+              <PresetTemplates
+                currentPresetId={currentPresetId}
+                onSelectPreset={handleSelectPreset}
+              />
+            )}
+
+            {activeCustomTab === 'style' && (
+              <StyleControls
+                fontFamily={fontFamily}
+                onChangeFontFamily={setFontFamily}
+                bgMode={bgMode}
+                onChangeBgMode={setBgMode}
+                aspectRatio={aspectRatio}
+                onChangeAspectRatio={setAspectRatio}
+                cornerRadius={cornerRadius}
+                onChangeCornerRadius={setCornerRadius}
+                borderStyle={borderStyle}
+                onChangeBorderStyle={setBorderStyle}
+                padding={padding}
+                onChangePadding={setPadding}
+                watermark={watermark}
+                onChangeWatermark={setWatermark}
+              />
+            )}
+
+            {activeCustomTab === 'lines' && (
+              <TextEditorPanel
+                lines={lines}
+                onChangeLines={(newLines) => {
+                  setLines(newLines);
+                  setRawText(newLines.join('\n'));
+                  setCurrentPresetId('custom');
+                }}
+                textCase={textCase}
+                onChangeTextCase={setTextCase}
+                fontSize={fontSize}
+                onChangeFontSize={setFontSize}
+                lineGap={lineGap}
+                onChangeLineGap={setLineGap}
+                letterSpacing={letterSpacing}
+                onChangeLetterSpacing={setLetterSpacing}
+                singleWordAlign={singleWordAlign}
+                onChangeSingleWordAlign={setSingleWordAlign}
+                onRandomMeme={handleRandomMeme}
+              />
+            )}
+          </div>
+        </div>
       </main>
 
       {/* Floating Bottom Action Bar for Mobile (< lg) */}
@@ -288,12 +439,12 @@ export default function HomePage() {
           {mobileTab === 'editor' ? (
             <>
               <Eye className="w-3.5 h-3.5 text-rose-400" />
-              <span>Lihat Preview</span>
+              <span>Lihat Stiker</span>
             </>
           ) : (
             <>
               <Edit3 className="w-3.5 h-3.5 text-rose-400" />
-              <span>Edit Teks</span>
+              <span>Ketik Teks</span>
             </>
           )}
         </button>
@@ -303,16 +454,15 @@ export default function HomePage() {
           disabled={isCopying}
           className="py-2 px-3 bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          <Copy className="w-3.5 h-3.5 text-rose-400" />
           <span>{copiedSuccess ? 'Tersalin' : 'Salin'}</span>
         </button>
 
         <button
-          onClick={() => setIsExportModalOpen(true)}
+          onClick={handleQuickDownload}
+          disabled={isDownloading}
           className="flex-1 py-2 px-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-rose-500/20 cursor-pointer"
         >
-          <Download className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span>Export</span>
+          <span>Simpan PNG</span>
         </button>
       </div>
 
@@ -352,7 +502,7 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Export Modal */}
+      {/* Export Modal (for optional 4x HD / JPG) */}
       <ExportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
