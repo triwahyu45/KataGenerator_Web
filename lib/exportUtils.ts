@@ -22,7 +22,7 @@ export async function exportElementAsImage(
   } = options;
 
   const filter = (node: HTMLElement) => {
-    // Exclude resize handles or UI overlays during capture
+    // Exclude resize handles, floating tools, or UI overlays during capture
     return !node.classList?.contains('no-export');
   };
 
@@ -50,8 +50,8 @@ export async function exportElementAsImage(
   // Trigger celebratory confetti
   try {
     confetti({
-      particleCount: 40,
-      spread: 60,
+      particleCount: 45,
+      spread: 70,
       origin: { y: 0.85 }
     });
   } catch (e) {
@@ -82,8 +82,8 @@ export async function copyElementToClipboard(
 
       try {
         confetti({
-          particleCount: 30,
-          spread: 45,
+          particleCount: 35,
+          spread: 50,
           origin: { y: 0.85 }
         });
       } catch (e) {}
@@ -94,6 +94,41 @@ export async function copyElementToClipboard(
     }
   } catch (err) {
     console.error('Copy to clipboard failed:', err);
+    throw err;
+  }
+}
+
+export async function shareElementAsImage(
+  element: HTMLElement,
+  title: string = 'Stiker KataGenerator'
+): Promise<boolean> {
+  try {
+    const blob = await toBlob(element, {
+      pixelRatio: 3,
+      cacheBust: true,
+      filter: (node: HTMLElement) => !node.classList?.contains('no-export')
+    });
+
+    if (!blob) throw new Error('Blob generation failed');
+
+    const file = new File([blob], `katagenerator-${Date.now()}.png`, { type: 'image/png' });
+
+    if (typeof navigator !== 'undefined' && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title,
+        text: 'Stiker dibuat dengan KataGenerator: https://triwahyu45.github.io/KataGenerator_Web/'
+      });
+      return true;
+    } else {
+      // Fallback: copy to clipboard
+      return await copyElementToClipboard(element, 3);
+    }
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      return false; // User closed the native share dialog without sharing
+    }
+    console.error('Share failed:', err);
     throw err;
   }
 }

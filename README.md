@@ -1,48 +1,94 @@
 # KataGenerator - Viral Justified Typography & Meme Sticker Generator 💬✨
 
-Web aplikasi interaktif untuk membuat stiker kata-kata bertipografi **justified (rata kiri-kanan)** yang sedang viral di Instagram Story, TikTok, dan Twitter/X (format *"Coba lu belah dada/hati gua... isinya..."*). Dilengkapi dengan preset band indie, custom upload logo/gambar, dan export kualitas tinggi.
+[![Deploy Next.js to GitHub Pages](https://github.com/triwahyu45/KataGenerator_Web/actions/workflows/deploy.yml/badge.svg)](https://github.com/triwahyu45/KataGenerator_Web/actions/workflows/deploy.yml)
+[![Live Demo](https://img.shields.io/badge/Demo%20Web-Live%20Online-emerald?style=for-the-badge&logo=githubpages&logoColor=white)](https://triwahyu45.github.io/KataGenerator_Web/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS%20v4-38bdf8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
 
-![KataGenerator Banner](https://raw.githubusercontent.com/triwahyu45/KataGenerator_Web/main/public/banner.png)
+> 🌐 **Website Resmi & Live Demo Online:**  
+> 👉 [**https://triwahyu45.github.io/KataGenerator_Web/**](https://triwahyu45.github.io/KataGenerator_Web/) 👈  
+> *(Bisa langsung dibuka di HP Android/iPhone atau Laptop tanpa perlu install apapun!)*
 
 ---
 
-## 🌟 Fitur Utama
+## 📌 Cara Memunculkan Link Web di Deskripsi (About) GitHub
 
-- **⚡ Engine Teks Justify Real-Time**: Tiap baris kata secara otomatis meregang rata ke tepi kiri dan kanan (`flex justify-between` + mathematical spacing), mereproduksi gaya visual tipografi kotak yang khas.
-- **🎨 Editor Baris Fleksibel**: 
-  - Tambah, pindahkan, dan hapus baris dengan leluasa.
-  - Opsi format teks instan: `abc` (huruf kecil santai ala meme), `ABC` (semua kapital), atau `Bebas`.
-  - Slider ukuran font dan jarak antar baris secara real-time.
-  - Fitur **Paste Teks Panjang** (otomatis memecah paragraf menjadi baris-baris justify).
-- **🎸 Logo & Punchline Image Inserter**:
-  - Pilihan preset logo band indie Indonesia: **Hindia, Sheila on 7, BARASUARA, Silampukau, for Revenge, PERUNGGU, Elephant Kind, .FEAST**, RRQ Hoshi, Jaemin NCT, hingga ikon hati.
-  - **Upload Gambar Sendiri** (PNG / SVG / JPG transparan dari galeri HP atau laptop).
-  - Slider skala logo dan fitur **Invert Warna** (hitam ⇄ putih).
-- **📐 Pengaturan Kanvas & Gaya**:
-  - Pilihan rasio kanvas: **Stiker (Auto-fit)**, **1:1 Kotak (Feed/DP)**, **4:5 Portrait**, dan **9:16 Story (IG Story / TikTok / WA Status)**.
-  - Mode latar belakang: **Putih Klasik**, **OLED Dark Mode**, **Kartu Stiker dengan Shadow**, dan **Bening (PNG Transparan)**.
-  - Watermark pojok kanan atas kustom (misal `@username_kamu`).
-- **🚀 Multi-Format Export & 1-Click Copy**:
-  - **Salin Gambar ke Clipboard** (1-klik langsung bisa di-paste `Ctrl+V` di WhatsApp Web, Telegram, Discord, atau Instagram Web).
-  - **Download File PNG** (Transparan atau dengan background) dan **JPEG**.
-  - Pilihan resolusi ekspor hingga **4x Ultra HD** (anti buram/pecah saat di-zoom).
+Jika link website belum tampil di bagian deskripsi utama (sidebar kanan repository GitHub), ikuti langkah mudah ini:
+
+1. Buka repository [KataGenerator_Web](https://github.com/triwahyu45/KataGenerator_Web).
+2. Di sebelah kanan halaman utama repository, temukan bagian **About**.
+3. Klik ikon **⚙️ (Gear / Settings)** di sebelah kanan tulisan About.
+4. Di bagian **Website**:
+   - Beri tanda centang pada opsi **"Use your GitHub Pages website"**, **ATAU**
+   - Masukkan langsung URL: `https://triwahyu45.github.io/KataGenerator_Web/`
+5. Klik **Save changes**. Link website sekarang akan muncul permanen di profil utama repository kamu! 🎉
+
+---
+
+## 💡 Apa Itu KataGenerator?
+
+**KataGenerator** adalah web app interaktif modern untuk membuat stiker kata-kata bertipografi **justified (rata kiri-kanan sempurna)** yang sedang viral di Instagram Story, TikTok, Twitter/X, dan WhatsApp (format khas *"coba lu belah dada/hati gua... isinya..."*). 
+
+Dilengkapi dengan engine peregangan teks matematis real-time, preset band indie populer Indonesia, esport, meme ikon, upload gambar kustom dari galeri, serta ekspor stiker transparan beresolusi tinggi hingga 4x Ultra HD.
+
+---
+
+## 🌟 Fitur Unggulan
+
+- **⚡ Real-Time Justified Text Engine**:
+  - Tiap baris otomatis meregang rata ke tepi kiri & kanan (`flex justify-between` + mathematical spacing), mereproduksi gaya visual tipografi kotak yang khas.
+  - Pengaturan perataan untuk baris dengan 1 kata (Rata Kiri, Rata Tengah, Rata Kanan, atau Renggang).
+  - Kontrol *Letter Spacing* (kerning) dan *Line Gap* (jarak baris) yang presisi.
+
+- **🎲 Acak Kata (Random Meme Generator)**:
+  - Tombol 1-klik untuk langsung memunculkan ide-ide kata viral lucu, bucin, skripsi/kuliah, dan indie secara acak.
+
+- **🎸 Koleksi Preset Logo & Punchline**:
+  - **Indie Bands Indonesia**: *Hindia, Sheila on 7, BARASUARA, Silampukau, for Revenge, PERUNGGU, Elephant Kind, .FEAST, Reality Club, Efek Rumah Kaca (ERK)*.
+  - **Esports & Pop Idol**: *RRQ Hoshi, ONIC Esports, JAEMIN NCT*.
+  - **Ikon & Meme**: *Hati Bucin ❤️, Patah Hati 💔, Tengkorak 💀, Kucing Meong 🐱, Api Membara 🔥, Kopi Senja ☕*.
+  - **Upload Gambar Kustom**: Bebas unggah file PNG, SVG, atau foto apapun dari galeri HP atau komputer.
+  - Fitur **Invert Warna** (Hitam ⇄ Putih) dan skala ukuran logo.
+
+- **🎨 Gaya Tampilan & Kanvas**:
+  - **Pilihan Rasio**: *Stiker (Auto-Fit)*, *1:1 Kotak (Feed/DP)*, *4:5 Portrait*, dan *9:16 Story (IG Story / TikTok / WA Status)*.
+  - **Warna Latar & Tema**:
+    - *Putih Klasik*
+    - *OLED Dark Mode*
+    - *Kartu 3D Stiker*
+    - *Bening / Transparan (Khusus Stiker PNG Instagram Story & WA)*
+    - *Vintage Kertas Cream*
+    - *Pastel Yellow (Memo Note)*
+    - *Pastel Rose (Bucin)*
+  - **Bentuk Sudut**: *Tajam*, *Bulat*, *Kurva*, dan *Kapsul (Pill)*.
+  - **Efek Outline**: *Polos*, *Garis Tipis*, *Die-Cut Vinyl Sticker*, dan *Glow Neon*.
+
+- **📱 Optimal untuk Smartphone & Desktop**:
+  - Dilengkapi tab switcher mobile (`Editor` & `Live Preview`) dan sticky bottom action bar sehingga pengguna smartphone tidak perlu repot scroll naik-turun.
+
+- **🚀 Ekspor Kualitas Tinggi & 1-Click Share**:
+  - **Salin Gambar ke Clipboard** (1-klik langsung siap `Ctrl+V` atau Paste di WhatsApp Web, Telegram, Discord).
+  - **Direct Web Share**: Kirim stiker langsung ke aplikasi chat dan media sosial di HP.
+  - **Download PNG Transparan & JPEG**.
+  - Pilihan resolusi hingga **4x Ultra HD** (anti pecah saat di-zoom).
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router, Turbopack)
+- **Framework**: [Next.js 16 (Turbopack)](https://nextjs.org/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Export Engine**: [html-to-image](https://github.com/bubkoo/html-to-image) & Native Canvas API
-- **Celebration**: [canvas-confetti](https://www.npmjs.com/package/canvas-confetti)
+- **Celebration Effect**: [canvas-confetti](https://www.npmjs.com/package/canvas-confetti)
+- **Deployment**: [GitHub Actions](https://github.com/features/actions) → [GitHub Pages](https://pages.github.com/)
 
 ---
 
-## 🚀 Menjalankan Project Secara Lokal
+## 💻 Menjalankan Project Secara Lokal
 
-Pastikan komputer kamu sudah terpasang [Node.js](https://nodejs.org/) (v18.17+ atau v20+ direkomendasikan).
+Pastikan komputer kamu sudah terpasang [Node.js](https://nodejs.org/) (v18+ atau v20+).
 
 1. **Clone repository ini**:
    ```bash
@@ -61,20 +107,20 @@ Pastikan komputer kamu sudah terpasang [Node.js](https://nodejs.org/) (v18.17+ a
    ```
 
 4. **Buka browser**:
-   Akses [http://localhost:3000](http://localhost:3000) untuk mulai mendesain stiker kata kamu.
+   Akses [http://localhost:3000](http://localhost:3000) untuk mendesain stiker kata kamu.
 
 ---
 
 ## 📦 Build untuk Production
 
-Untuk membuat build produksi yang dioptimalkan:
 ```bash
 npm run build
-npm run start
 ```
+File static export yang siap di-deploy akan dihasilkan di dalam folder `./out`.
 
 ---
 
-## 📄 Lisensi & Kontribusi
+## 📄 Lisensi & Pembuat
 
-Dibuat dengan ❤️ oleh [Tri Wahyu](https://github.com/triwahyu45). Kontribusi, issue, dan ide preset baru sangat dipersilakan!
+Dibuat dengan ❤️ oleh [Tri Wahyu](https://github.com/triwahyu45).  
+Kontribusi, ide preset kata, serta request logo band baru sangat dipersilakan melalui Pull Request & Issues!

@@ -2,17 +2,19 @@
 
 import React from 'react';
 import { FONT_OPTIONS } from '@/lib/presets';
-import { Palette, Maximize, AtSign, Layout, Layers, ShieldCheck } from 'lucide-react';
+import { Palette, Maximize, AtSign, Layers, Sparkles, Square, Circle } from 'lucide-react';
 
 interface StyleControlsProps {
   fontFamily: string;
   onChangeFontFamily: (font: string) => void;
-  fontWeight: string;
-  onChangeFontWeight: (weight: string) => void;
-  bgMode: 'white' | 'dark' | 'transparent' | 'card';
-  onChangeBgMode: (mode: 'white' | 'dark' | 'transparent' | 'card') => void;
+  bgMode: 'white' | 'dark' | 'transparent' | 'card' | 'cream' | 'pastel-yellow' | 'pastel-rose';
+  onChangeBgMode: (mode: 'white' | 'dark' | 'transparent' | 'card' | 'cream' | 'pastel-yellow' | 'pastel-rose') => void;
   aspectRatio: 'auto' | '1:1' | '9:16' | '4:5';
   onChangeAspectRatio: (ratio: 'auto' | '1:1' | '9:16' | '4:5') => void;
+  cornerRadius: 'none' | 'md' | 'xl' | 'full';
+  onChangeCornerRadius: (r: 'none' | 'md' | 'xl' | 'full') => void;
+  borderStyle: 'none' | 'thin' | 'sticker' | 'neon';
+  onChangeBorderStyle: (b: 'none' | 'thin' | 'sticker' | 'neon') => void;
   padding: number;
   onChangePadding: (p: number) => void;
   watermark: string;
@@ -22,12 +24,14 @@ interface StyleControlsProps {
 export const StyleControls: React.FC<StyleControlsProps> = ({
   fontFamily,
   onChangeFontFamily,
-  fontWeight,
-  onChangeFontWeight,
   bgMode,
   onChangeBgMode,
   aspectRatio,
   onChangeAspectRatio,
+  cornerRadius,
+  onChangeCornerRadius,
+  borderStyle,
+  onChangeBorderStyle,
   padding,
   onChangePadding,
   watermark,
@@ -37,8 +41,13 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
     <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <Palette className="w-4 h-4 text-rose-400" />
-        <h2 className="text-sm font-semibold text-white">Gaya Tampilan & Kanvas</h2>
+        <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
+          <Palette className="w-4 h-4" />
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-white">Gaya Kanvas & Estetika</h2>
+          <p className="text-[11px] text-slate-400">Pilih tema, rasio, bentuk sudut, dan efek stiker</p>
+        </div>
       </div>
 
       {/* Font Family Selection */}
@@ -59,7 +68,7 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
                     : 'bg-slate-950/80 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-900'
                 }`}
               >
-                <div className={`text-sm mb-1 ${font.style}`}>Contoh Teks</div>
+                <div className={`text-sm mb-0.5 ${font.style}`}>Contoh Teks</div>
                 <div className="text-[10px] text-slate-400 truncate">{font.name}</div>
               </button>
             );
@@ -67,12 +76,99 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
         </div>
       </div>
 
-      {/* Aspect Ratio & Background Modes */}
+      {/* Background Theme Modes */}
+      <div>
+        <label className="text-xs text-slate-400 font-medium mb-1.5 flex items-center gap-1.5">
+          <Layers className="w-3.5 h-3.5 text-rose-400" /> Warna Latar & Tema
+        </label>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+          <button
+            onClick={() => onChangeBgMode('white')}
+            className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              bgMode === 'white'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-white border border-slate-400"></span>
+            <span>Putih</span>
+          </button>
+          <button
+            onClick={() => onChangeBgMode('dark')}
+            className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              bgMode === 'dark'
+                ? 'bg-rose-500 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-black border border-slate-700"></span>
+            <span>OLED</span>
+          </button>
+          <button
+            onClick={() => onChangeBgMode('card')}
+            className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              bgMode === 'card'
+                ? 'bg-rose-500 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+            <span>Kartu 3D</span>
+          </button>
+          <button
+            onClick={() => onChangeBgMode('transparent')}
+            className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              bgMode === 'transparent'
+                ? 'bg-rose-500 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="Transparan PNG (Stiker Bening)"
+          >
+            <span className="w-2.5 h-2.5 rounded-full border border-dashed border-rose-400"></span>
+            <span>Bening</span>
+          </button>
+          <button
+            onClick={() => onChangeBgMode('cream')}
+            className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              bgMode === 'cream'
+                ? 'bg-amber-100 text-amber-950 shadow-sm font-bold'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-[#fbf6ed] border border-amber-300"></span>
+            <span>Vintage</span>
+          </button>
+          <button
+            onClick={() => onChangeBgMode('pastel-yellow')}
+            className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              bgMode === 'pastel-yellow'
+                ? 'bg-yellow-200 text-yellow-950 shadow-sm font-bold'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-[#fef9c3] border border-yellow-400"></span>
+            <span>Memo</span>
+          </button>
+          <button
+            onClick={() => onChangeBgMode('pastel-rose')}
+            className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 col-span-2 ${
+              bgMode === 'pastel-rose'
+                ? 'bg-rose-200 text-rose-950 shadow-sm font-bold'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-[#ffe4e6] border border-rose-300"></span>
+            <span>Pastel Bucin</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Aspect Ratio & Corner Radius */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Aspect Ratio */}
         <div>
           <label className="text-xs text-slate-400 font-medium mb-1.5 flex items-center gap-1.5">
-            <Maximize className="w-3.5 h-3.5 text-rose-400" /> Ukuran Rasio Kanvas
+            <Maximize className="w-3.5 h-3.5 text-rose-400" /> Rasio Kanvas
           </label>
           <div className="grid grid-cols-4 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
             <button
@@ -82,7 +178,7 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
                   ? 'bg-rose-500 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Sesuai ukuran teks (Pas untuk stiker)"
+              title="Stiker Auto-Fit (Pas Ukuran Teks)"
             >
               Stiker
             </button>
@@ -93,7 +189,7 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
                   ? 'bg-rose-500 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="1:1 Kotak (Instagram Feed / DP)"
+              title="1:1 Kotak (Feed & Avatar)"
             >
               1:1
             </button>
@@ -115,61 +211,111 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
                   ? 'bg-rose-500 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="9:16 Story (IG Story / TikTok / WA Status)"
+              title="9:16 Story (Instagram / TikTok / WA)"
             >
               9:16
             </button>
           </div>
         </div>
 
-        {/* Background Mode */}
+        {/* Corner Radius */}
         <div>
           <label className="text-xs text-slate-400 font-medium mb-1.5 flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5 text-rose-400" /> Warna Latar (Background)
+            <Square className="w-3.5 h-3.5 text-rose-400" /> Bentuk Sudut Stiker
           </label>
           <div className="grid grid-cols-4 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
             <button
-              onClick={() => onChangeBgMode('white')}
+              onClick={() => onChangeCornerRadius('none')}
               className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                bgMode === 'white'
+                cornerRadius === 'none'
                   ? 'bg-rose-500 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Putih
+              Tajam
             </button>
             <button
-              onClick={() => onChangeBgMode('dark')}
+              onClick={() => onChangeCornerRadius('md')}
               className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                bgMode === 'dark'
+                cornerRadius === 'md'
                   ? 'bg-rose-500 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              OLED
+              Bulat
             </button>
             <button
-              onClick={() => onChangeBgMode('card')}
+              onClick={() => onChangeCornerRadius('xl')}
               className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                bgMode === 'card'
+                cornerRadius === 'xl'
                   ? 'bg-rose-500 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Kartu
+              Kurva
             </button>
             <button
-              onClick={() => onChangeBgMode('transparent')}
+              onClick={() => onChangeCornerRadius('full')}
               className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                bgMode === 'transparent'
+                cornerRadius === 'full'
                   ? 'bg-rose-500 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Transparan PNG (Tanpa Background)"
             >
-              Bening
+              Kapsul
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Border & Outline Effects */}
+      <div>
+        <label className="text-xs text-slate-400 font-medium mb-1.5 flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-rose-400" /> Gaya Outline / Efek Stiker
+        </label>
+        <div className="grid grid-cols-4 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button
+            onClick={() => onChangeBorderStyle('none')}
+            className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              borderStyle === 'none'
+                ? 'bg-rose-500 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Polos
+          </button>
+          <button
+            onClick={() => onChangeBorderStyle('thin')}
+            className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              borderStyle === 'thin'
+                ? 'bg-rose-500 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Garis Tipis
+          </button>
+          <button
+            onClick={() => onChangeBorderStyle('sticker')}
+            className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              borderStyle === 'sticker'
+                ? 'bg-rose-500 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="Gaya cutting sticker vinyl tebal"
+          >
+            Die-Cut Vinyl
+          </button>
+          <button
+            onClick={() => onChangeBorderStyle('neon')}
+            className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              borderStyle === 'neon'
+                ? 'bg-rose-500 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="Efek glow neon berpendar"
+          >
+            Glow Neon
+          </button>
         </div>
       </div>
 
@@ -178,7 +324,7 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
         {/* Padding Slider */}
         <div>
           <div className="flex justify-between items-center text-[11px] font-medium text-slate-400 mb-1.5">
-            <span>Padding / Ruang Tepi</span>
+            <span>Ruang Tepi (Padding)</span>
             <span className="text-white font-mono">{padding}px</span>
           </div>
           <input
@@ -202,7 +348,7 @@ export const StyleControls: React.FC<StyleControlsProps> = ({
             value={watermark}
             onChange={(e) => onChangeWatermark(e.target.value)}
             placeholder="misal: @nama_ig_kamu (opsional)"
-            className="w-full bg-slate-950 text-slate-100 text-xs px-3 py-1.5 rounded-xl border border-slate-800 focus:outline-none focus:border-rose-500 transition-colors"
+            className="w-full bg-slate-950 text-slate-100 text-xs px-3 py-2 rounded-xl border border-slate-800 focus:outline-none focus:border-rose-500 transition-colors"
           />
         </div>
       </div>

@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Download, Copy, Check, Sparkles, FileImage, Layers } from 'lucide-react';
-import { exportElementAsImage, copyElementToClipboard } from '@/lib/exportUtils';
+import { X, Download, Copy, Check, Sparkles, FileImage, Layers, Share2 } from 'lucide-react';
+import { exportElementAsImage, copyElementToClipboard, shareElementAsImage } from '@/lib/exportUtils';
 
 interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   canvasRef: React.RefObject<HTMLDivElement | null>;
-  bgMode: 'white' | 'dark' | 'transparent' | 'card';
+  bgMode: 'white' | 'dark' | 'transparent' | 'card' | 'cream' | 'pastel-yellow' | 'pastel-rose';
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
@@ -21,6 +21,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [format, setFormat] = useState<'png' | 'jpeg'>('png');
   const [isExporting, setIsExporting] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const [copiedSuccess, setCopiedSuccess] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -68,6 +69,22 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     }
   };
 
+  const handleShare = async () => {
+    if (!canvasRef.current) return;
+    setIsSharing(true);
+    try {
+      const ok = await shareElementAsImage(canvasRef.current, 'Stiker KataGenerator');
+      if (ok) {
+        showToast('Stiker siap dibagikan!');
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+      showToast('Gagal membagikan langsung. Silakan download gambarnya.');
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
@@ -78,7 +95,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <Download className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-white">Export & Download Hasil</h3>
+              <h3 className="font-bold text-sm text-white">Export & Download Stiker</h3>
               <p className="text-[11px] text-slate-400">Pilih format dan resolusi stiker kamu</p>
             </div>
           </div>
@@ -123,7 +140,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 }`}
               >
                 <div className="font-bold text-xs mb-0.5">JPEG / JPG</div>
-                <div className="text-[10px] text-slate-400">Ukuran file lebih ringan</div>
+                <div className="text-[10px] text-slate-400">Ukuran file lebih hemat memori</div>
               </button>
             </div>
           </div>
@@ -179,36 +196,47 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           )}
 
           {/* Actions */}
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            <button
-              onClick={handleCopyClipboard}
-              disabled={isCopying}
-              className={`py-2.5 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                copiedSuccess
-                  ? 'bg-emerald-500 text-white border-emerald-400'
-                  : 'bg-slate-800 hover:bg-slate-750 text-slate-200 border-slate-700'
-              }`}
-            >
-              {copiedSuccess ? (
-                <>
-                  <Check className="w-4 h-4 stroke-[2.5]" />
-                  <span>Tersalin!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4 text-rose-400" />
-                  <span>{isCopying ? 'Menyalin...' : 'Salin ke Clipboard'}</span>
-                </>
-              )}
-            </button>
+          <div className="space-y-2 pt-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={handleCopyClipboard}
+                disabled={isCopying}
+                className={`py-2.5 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  copiedSuccess
+                    ? 'bg-emerald-500 text-white border-emerald-400'
+                    : 'bg-slate-800 hover:bg-slate-750 text-slate-200 border-slate-700'
+                }`}
+              >
+                {copiedSuccess ? (
+                  <>
+                    <Check className="w-4 h-4 stroke-[2.5]" />
+                    <span>Tersalin!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 text-rose-400" />
+                    <span>{isCopying ? 'Menyalin...' : 'Salin ke Clipboard'}</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={handleShare}
+                disabled={isSharing}
+                className="py-2.5 px-3 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              >
+                <Share2 className="w-4 h-4 text-cyan-400" />
+                <span>{isSharing ? 'Membuka...' : 'Bagi ke WA / IG'}</span>
+              </button>
+            </div>
 
             <button
               onClick={handleDownload}
               disabled={isExporting}
-              className="py-2.5 px-3 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-rose-500/25 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              className="w-full py-3 px-3 bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <Download className="w-4 h-4 stroke-[2.5]" />
-              <span>{isExporting ? 'Memproses...' : 'Download Gambar'}</span>
+              <span>{isExporting ? 'Memproses Ekspor...' : 'Download File Sekarang'}</span>
             </button>
           </div>
         </div>

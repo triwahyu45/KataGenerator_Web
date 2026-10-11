@@ -2,7 +2,7 @@
 
 import React, { forwardRef, useState } from 'react';
 import { PRESET_LOGOS } from '@/lib/presets';
-import { Download, Copy, ZoomIn, ZoomOut, Check, Sparkles } from 'lucide-react';
+import { Download, Copy, ZoomIn, ZoomOut, Check, Sparkles, Share2 } from 'lucide-react';
 
 interface CanvasPreviewProps {
   lines: string[];
@@ -14,12 +14,17 @@ interface CanvasPreviewProps {
   fontFamily: string;
   fontSize: number;
   lineGap: number;
+  letterSpacing: number;
+  singleWordAlign: 'left' | 'center' | 'right' | 'justify';
   padding: number;
-  bgMode: 'white' | 'dark' | 'transparent' | 'card';
+  bgMode: 'white' | 'dark' | 'transparent' | 'card' | 'cream' | 'pastel-yellow' | 'pastel-rose';
   aspectRatio: 'auto' | '1:1' | '9:16' | '4:5';
+  cornerRadius: 'none' | 'md' | 'xl' | 'full';
+  borderStyle: 'none' | 'thin' | 'sticker' | 'neon';
   watermark: string;
   onOpenExport: () => void;
   onQuickCopy: () => void;
+  onShare: () => void;
   isCopying: boolean;
   copiedSuccess: boolean;
 }
@@ -36,12 +41,17 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
       fontFamily,
       fontSize,
       lineGap,
+      letterSpacing,
+      singleWordAlign,
       padding,
       bgMode,
       aspectRatio,
+      cornerRadius,
+      borderStyle,
       watermark,
       onOpenExport,
       onQuickCopy,
+      onShare,
       isCopying,
       copiedSuccess,
     },
@@ -80,37 +90,85 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
       }
     };
 
+    // Corner radius class
+    const getCornerClass = () => {
+      switch (cornerRadius) {
+        case 'md':
+          return 'rounded-xl';
+        case 'xl':
+          return 'rounded-3xl';
+        case 'full':
+          return 'rounded-[40px]';
+        case 'none':
+        default:
+          return 'rounded-none';
+      }
+    };
+
+    // Border & Outline styles
+    const getBorderClass = () => {
+      switch (borderStyle) {
+        case 'thin':
+          return bgMode === 'dark'
+            ? 'border border-neutral-700'
+            : 'border border-neutral-300';
+        case 'sticker':
+          return bgMode === 'dark'
+            ? 'ring-4 ring-neutral-800 shadow-2xl'
+            : 'ring-4 ring-white shadow-2xl';
+        case 'neon':
+          return 'border-2 border-rose-500 shadow-[0_0_25px_rgba(244,63,94,0.45)]';
+        case 'none':
+        default:
+          return '';
+      }
+    };
+
     // Background and text color styles
     const getThemeStyles = () => {
       switch (bgMode) {
         case 'dark':
           return {
             containerBg: 'bg-black text-white',
-            border: 'border border-neutral-900',
             textColor: '#ffffff',
-            invertDefault: false,
+            watermarkColor: '#a1a1aa',
           };
         case 'transparent':
           return {
             containerBg: 'bg-transparent text-black',
-            border: 'border border-dashed border-slate-700/50',
             textColor: '#000000',
-            invertDefault: false,
+            watermarkColor: '#52525b',
           };
         case 'card':
           return {
-            containerBg: 'bg-white text-black shadow-2xl rounded-2xl',
-            border: 'border border-slate-200/80',
+            containerBg: 'bg-white text-black shadow-2xl',
             textColor: '#000000',
-            invertDefault: false,
+            watermarkColor: '#71717a',
+          };
+        case 'cream':
+          return {
+            containerBg: 'bg-[#fbf6ed] text-[#1c1917]',
+            textColor: '#1c1917',
+            watermarkColor: '#78716c',
+          };
+        case 'pastel-yellow':
+          return {
+            containerBg: 'bg-[#fef9c3] text-[#1e293b]',
+            textColor: '#1e293b',
+            watermarkColor: '#64748b',
+          };
+        case 'pastel-rose':
+          return {
+            containerBg: 'bg-[#ffe4e6] text-[#4c0519]',
+            textColor: '#4c0519',
+            watermarkColor: '#881337',
           };
         case 'white':
         default:
           return {
             containerBg: 'bg-white text-black',
-            border: 'border border-slate-200',
             textColor: '#000000',
-            invertDefault: false,
+            watermarkColor: '#71717a',
           };
       }
     };
@@ -136,7 +194,8 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
       <div className="flex flex-col items-center w-full">
         {/* Top Floating Control Bar */}
         <div className="w-full flex items-center justify-between gap-2 mb-3 px-1 no-export">
-          <div className="flex items-center gap-1.5 bg-slate-900/90 border border-slate-800 p-1 rounded-xl shadow-sm text-xs">
+          {/* Zoom Controls */}
+          <div className="flex items-center gap-1 bg-slate-900/90 border border-slate-800 p-1 rounded-xl shadow-sm text-xs">
             <button
               onClick={() => setZoom((z) => Math.max(0.6, z - 0.1))}
               className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
@@ -156,20 +215,32 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
             </button>
             <button
               onClick={() => setZoom(1)}
-              className="px-2 py-1 text-[10px] text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer ml-1"
+              className="px-2 py-1 text-[10px] text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer ml-0.5"
             >
               100%
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Quick Action Buttons */}
+          <div className="flex items-center gap-1.5">
+            {/* Quick Share */}
+            <button
+              onClick={onShare}
+              className="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold rounded-xl border bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-750 hover:text-white transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+              title="Bagikan stiker langsung ke WhatsApp atau media sosial"
+            >
+              <Share2 className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden sm:inline">Bagikan</span>
+            </button>
+
+            {/* Quick Copy */}
             <button
               onClick={onQuickCopy}
               disabled={isCopying}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer shadow-sm ${
                 copiedSuccess
                   ? 'bg-emerald-500 text-white border-emerald-400 ring-2 ring-emerald-500/30'
-                  : 'bg-slate-900 hover:bg-slate-850 text-slate-200 border-slate-750 hover:text-white'
+                  : 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-750 hover:text-white'
               }`}
             >
               {copiedSuccess ? (
@@ -180,11 +251,12 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
               ) : (
                 <>
                   <Copy className="w-3.5 h-3.5 text-rose-400" />
-                  <span>{isCopying ? 'Menyalin...' : 'Salin Gambar'}</span>
+                  <span>{isCopying ? 'Menyalin...' : 'Salin'}</span>
                 </>
               )}
             </button>
 
+            {/* Open Export Modal */}
             <button
               onClick={onOpenExport}
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white text-xs font-bold rounded-xl shadow-md shadow-rose-500/20 transition-all cursor-pointer"
@@ -195,8 +267,14 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
           </div>
         </div>
 
-        {/* Canvas Outer Stage with Checkered pattern for transparent support */}
-        <div className="w-full min-h-[460px] sm:min-h-[520px] rounded-2xl bg-slate-925 border border-slate-800/90 flex items-center justify-center p-4 sm:p-8 overflow-auto relative">
+        {/* Canvas Outer Stage with Checkered pattern for transparent stiker */}
+        <div
+          className={`w-full min-h-[460px] sm:min-h-[520px] rounded-2xl border border-slate-800/90 flex items-center justify-center p-4 sm:p-8 overflow-auto relative ${
+            bgMode === 'transparent'
+              ? 'bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] bg-slate-950'
+              : 'bg-slate-950/90'
+          }`}
+        >
           <div
             className="transition-transform duration-100 ease-out origin-center"
             style={{ transform: `scale(${zoom})` }}
@@ -205,7 +283,7 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
             <div
               ref={ref}
               id="kata-export-canvas"
-              className={`relative flex flex-col justify-center select-none ${theme.containerBg} ${theme.border} ${getFontClass()}`}
+              className={`relative flex flex-col justify-center select-none ${theme.containerBg} ${getCornerClass()} ${getBorderClass()} ${getFontClass()}`}
               style={{
                 ...getAspectRatioStyle(),
                 padding: `${padding}px`,
@@ -215,10 +293,8 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
               {/* Optional Watermark */}
               {watermark && (
                 <div
-                  className="absolute top-3 right-3 text-[11px] font-bold opacity-85 tracking-tight select-none pointer-events-none"
-                  style={{
-                    color: bgMode === 'dark' ? '#94a3b8' : '#000000',
-                  }}
+                  className="absolute top-3.5 right-4 text-[11px] font-bold opacity-80 tracking-tight select-none pointer-events-none"
+                  style={{ color: theme.watermarkColor }}
                 >
                   {watermark}
                 </div>
@@ -239,19 +315,32 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
                     return (
                       <div
                         key={idx}
-                        style={{ height: `${fontSize}px` }}
+                        style={{ height: `${fontSize * 0.8}px` }}
                         className="w-full"
                       />
                     );
                   }
 
                   if (words.length === 1) {
+                    const alignClass =
+                      singleWordAlign === 'center'
+                        ? 'justify-center text-center'
+                        : singleWordAlign === 'right'
+                        ? 'justify-end text-right'
+                        : singleWordAlign === 'justify'
+                        ? 'justify-center tracking-widest'
+                        : 'justify-start text-left';
+
                     return (
                       <div
                         key={idx}
-                        className="w-full flex justify-start items-baseline font-bold"
+                        className={`w-full flex ${alignClass} items-baseline font-bold`}
                         style={{
                           fontSize: `${fontSize}px`,
+                          letterSpacing:
+                            singleWordAlign === 'justify'
+                              ? '0.3em'
+                              : `${letterSpacing}px`,
                           lineHeight: 1.15,
                         }}
                       >
@@ -267,6 +356,7 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
                       className="w-full flex justify-between items-baseline font-bold"
                       style={{
                         fontSize: `${fontSize}px`,
+                        letterSpacing: `${letterSpacing}px`,
                         lineHeight: 1.15,
                       }}
                     >
@@ -283,7 +373,7 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
               {/* Logo / Punchline Image */}
               {(presetLogo || customLogoUrl) && (
                 <div
-                  className="w-full flex items-center justify-center mt-3 pt-1"
+                  className="w-full flex items-center justify-center mt-3.5 pt-1"
                   style={{
                     transform: `scale(${logoScale})`,
                     transformOrigin: 'center center',
@@ -311,7 +401,7 @@ export const CanvasPreview = forwardRef<HTMLDivElement, CanvasPreviewProps>(
 
         {/* Tip caption below preview */}
         <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-2.5">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
           <span>
             Tips: Gunakan mode <strong>Bening</strong> untuk stiker transparan di Instagram Story & WhatsApp!
           </span>
